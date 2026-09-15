@@ -17,7 +17,9 @@ const badgeVariants = cva(
         success:
           'border-transparent bg-emerald-600 text-white shadow hover:bg-emerald-700',
         church:
-          'border-transparent bg-church-700 text-white shadow hover:bg-church-800',
+          'border-transparent bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 shadow-sm',
+        amber:
+          'border-amber-300/80 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
       },
     },
     defaultVariants: {

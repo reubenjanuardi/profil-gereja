@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Church, Menu, X, Shield } from 'lucide-react'
+import { Church, Menu, X, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -24,25 +24,28 @@ export function Navbar() {
   }, [pathname])
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-sm">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/85">
       <div className="container flex h-16 items-center justify-between">
         {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-slate-900 dark:text-white transition-opacity hover:opacity-90">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-church-800 text-white shadow-sm">
-            <Church className="h-5 w-5" />
+        <Link
+          href="/"
+          className="flex items-center gap-3 font-bold text-slate-900 dark:text-white transition-opacity hover:opacity-90 tactile-press"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 shadow-sm">
+            <Church className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div className="flex flex-col text-left leading-tight">
-            <span className="text-base font-extrabold tracking-tight text-church-900 dark:text-church-100">
+            <span className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
               GPIB HOSIANA
             </span>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider uppercase">
               Jakarta
             </span>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+        <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             const isActive = pathname === link.href
             return (
@@ -50,10 +53,10 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'px-3.5 py-2 text-sm font-medium rounded-md transition-colors',
+                  'px-3.5 py-1.5 text-sm font-medium rounded-md transition-colors tactile-press',
                   isActive
-                    ? 'bg-church-50 text-church-900 font-semibold dark:bg-slate-800 dark:text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/70'
                 )}
               >
                 {link.label}
@@ -64,9 +67,14 @@ export function Navbar() {
 
         {/* Action Button & Mobile Menu Toggle */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex gap-1.5 text-xs font-semibold">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="hidden sm:inline-flex gap-1.5 text-xs font-semibold border-slate-300 dark:border-slate-700"
+          >
             <Link href="/admin">
-              <Shield className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
               Admin Portal
             </Link>
           </Button>
@@ -74,9 +82,9 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-slate-800 dark:text-slate-200"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle Menu"
+            aria-label="Buka Menu"
           >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -85,7 +93,7 @@ export function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {isOpen && (
-        <div className="md:hidden border-b bg-background px-4 py-4 shadow-lg animate-in slide-in-from-top-2">
+        <div className="md:hidden border-b border-slate-200 dark:border-slate-800 bg-background px-4 py-4 shadow-md">
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href
@@ -96,7 +104,7 @@ export function Navbar() {
                   className={cn(
                     'px-3 py-2.5 text-sm font-medium rounded-md transition-colors',
                     isActive
-                      ? 'bg-church-100 text-church-900 font-semibold dark:bg-slate-800 dark:text-white'
+                      ? 'bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900'
                       : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                   )}
                 >
@@ -104,12 +112,12 @@ export function Navbar() {
                 </Link>
               )
             })}
-            <div className="pt-2 border-t mt-2">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 mt-2">
               <Link
                 href="/admin"
-                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-church-800 dark:text-church-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
               >
-                <Shield className="h-4 w-4" />
+                <ShieldCheck className="h-4 w-4" />
                 Admin Panel (/admin)
               </Link>
             </div>

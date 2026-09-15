@@ -12,15 +12,16 @@ import {
   MapPin,
   User,
   Download,
-  Quote,
-  Sparkles,
+  Church,
+  ShieldCheck,
+  Compass,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatDateIndonesian, formatDateTimeIndonesian } from '@/lib/utils'
 
-export const revalidate = 60 // Revalidate cache every 60 seconds
+export const revalidate = 60
 
 export default async function HomePage() {
   let heroCarousels: any[] = []
@@ -32,7 +33,6 @@ export default async function HomePage() {
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // 1. Fetch Active Hero Carousels
     const heroRes = await payload.find({
       collection: 'hero-carousel',
       where: {
@@ -45,7 +45,6 @@ export default async function HomePage() {
     })
     heroCarousels = heroRes.docs
 
-    // 2. Fetch Active Pengumuman (expiry_date >= now)
     const nowIso = new Date().toISOString()
     const pengumumanRes = await payload.find({
       collection: 'pengumuman',
@@ -59,12 +58,10 @@ export default async function HomePage() {
     })
     pengumumanList = pengumumanRes.docs
 
-    // 3. Fetch Tema Gereja Global
     temaGereja = await payload.findGlobal({
       slug: 'tema-gereja',
     })
 
-    // 4. Fetch Jadwal Ibadah (upcoming)
     const jadwalRes = await payload.find({
       collection: 'jadwal-ibadah',
       sort: 'waktu',
@@ -72,18 +69,16 @@ export default async function HomePage() {
     })
     upcomingJadwal = jadwalRes.docs
 
-    // 5. Fetch Latest Dokumen (Warta & Tata Ibadah)
     const dokumenRes = await payload.find({
       collection: 'dokumen-gereja',
       sort: '-periode_tanggal',
-      limit: 4,
+      limit: 3,
     })
     latestDokumen = dokumenRes.docs
   } catch (error) {
     console.error('Error fetching data for Homepage:', error)
   }
 
-  // Active Hero Slide (Default or First)
   const heroSlide = heroCarousels[0] || null
   const heroImageUrl =
     typeof heroSlide?.gambar === 'object' && heroSlide?.gambar?.url
@@ -91,109 +86,202 @@ export default async function HomePage() {
       : null
   const heroText =
     heroSlide?.teks_sambutan ||
-    'Selamat Datang di Website Resmi GPIB Jemaat Hosiana Jakarta'
+    'Melayani dengan Kasih, Bersekutu dalam Terang Firman'
+
+  const featuredNotice = pengumumanList[0] || null
+  const secondaryNotices = pengumumanList.slice(1)
 
   return (
     <main className="min-h-screen">
-      {/* 1. HERO SECTION */}
-      <section className="relative w-full min-h-[480px] lg:min-h-[560px] flex items-center justify-center bg-slate-950 text-white overflow-hidden">
-        {/* Background Image with Dark Gradient Overlay */}
-        {heroImageUrl ? (
-          <Image
-            src={heroImageUrl}
-            alt={heroSlide?.gambar?.alt || 'Gedung GPIB Jemaat Hosiana Jakarta'}
-            fill
-            priority
-            className="object-cover object-center opacity-40 scale-105"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-church-950 via-slate-900 to-slate-950" />
+      {/* 1. ASYMMETRIC SPLIT HERO SECTION */}
+      <section className="relative w-full border-b border-slate-200 dark:border-slate-800 bg-slate-950 text-white overflow-hidden">
+        {/* Subtle architectural gradient base */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-950 opacity-95" />
+
+        {/* Church Image Ambient Underlay */}
+        {heroImageUrl && (
+          <div className="absolute inset-0 opacity-20 mix-blend-luminosity pointer-events-none">
+            <Image
+              src={heroImageUrl}
+              alt={heroSlide?.gambar?.alt || 'Gedung Gereja GPIB Hosiana Jakarta'}
+              fill
+              priority
+              className="object-cover object-center"
+            />
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
-        {/* Hero Content */}
-        <div className="container relative z-10 py-16 text-center max-w-4xl mx-auto space-y-6">
-          <Badge variant="secondary" className="px-4 py-1.5 text-xs font-semibold bg-white/10 text-church-200 border-white/20 backdrop-blur">
-            Gereja Protestan di Indonesia bagian Barat
-          </Badge>
-          
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            {heroText}
-          </h1>
+        <div className="container relative z-10 py-16 md:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            {/* Left Column (7 cols): Asymmetric Left-Aligned Typography */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 border border-white/15 text-xs font-semibold text-slate-200">
+                <Church className="h-3.5 w-3.5 text-slate-300" />
+                GPIB Jemaat Hosiana Jakarta
+              </div>
 
-          <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
-            Menyajikan informasi jadwal ibadah, warta jemaat, tata ibadah, dan kegiatan pelayanan secara terbuka, ringkas, dan informatif.
-          </p>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+                {heroText}
+              </h1>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-4">
-            <Button size="lg" asChild className="bg-church-600 hover:bg-church-700 text-white font-semibold shadow-lg">
-              <Link href="/jadwal" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Jadwal Ibadah
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="border-white/30 text-white hover:bg-white/10 font-semibold backdrop-blur">
-              <Link href="/warta" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Warta &amp; Tata Ibadah
-              </Link>
-            </Button>
+              <p className="text-base sm:text-lg text-slate-300 max-w-[54ch] font-normal leading-relaxed">
+                Pusat informasi warta jemaat, tata ibadah digital, jadwal persekutuan hari Minggu, dan pelayanan kategorial di Jakarta.
+              </p>
+
+              {/* Dual Primary CTAs (No Wrapping) */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Button
+                  size="lg"
+                  asChild
+                  className="bg-white text-slate-950 hover:bg-slate-100 font-semibold shadow-sm tactile-press px-6"
+                >
+                  <Link href="/jadwal" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Jadwal Ibadah
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  asChild
+                  className="border-white/25 text-white hover:bg-white/10 font-semibold backdrop-blur-xs tactile-press px-6"
+                >
+                  <Link href="/warta" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Warta &amp; Tata Ibadah
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Column (5 cols): Live Ministry Schedule Card Preview */}
+            <div className="lg:col-span-5">
+              <div className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md p-6 sm:p-7 space-y-5 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                    Ibadah Terdekat
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Terbuka untuk Jemaat
+                  </span>
+                </div>
+
+                {upcomingJadwal.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <p className="text-lg font-bold text-white">
+                        {upcomingJadwal[0].nama_ibadah}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-slate-300">
+                        <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <span>{formatDateTimeIndonesian(upcomingJadwal[0].waktu)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-300">
+                        <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <span>{upcomingJadwal[0].lokasi}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-200 pt-1 font-medium">
+                        <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <span>Pelayan: {upcomingJadwal[0].pelayan_firman}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                      <span className="text-slate-400">
+                        {upcomingJadwal.length > 1 ? `+${upcomingJadwal.length - 1} jadwal lainnya` : 'Gedung Gereja'}
+                      </span>
+                      <Link
+                        href="/jadwal"
+                        className="text-white font-semibold hover:underline inline-flex items-center gap-1"
+                      >
+                        Semua Jadwal <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-6 text-center text-xs text-slate-400">
+                    Belum ada jadwal terdaftar. Kunjungi halaman Jadwal untuk informasi terkini.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 2. NOTICE BOARD (PENGUMUMAN MENDESAK/TERKINI) */}
+      {/* 2. ASYMMETRIC NOTICE BOARD (PENGUMUMAN MENDESAK) */}
       {pengumumanList.length > 0 && (
-        <section className="bg-amber-500/10 border-y border-amber-500/20 py-6">
+        <section className="bg-amber-500/10 border-b border-amber-500/20 py-8">
           <div className="container">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500 text-slate-950 font-bold">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-600 text-white shadow-xs">
                 <BellRing className="h-4 w-4" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-amber-400">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
                 Papan Pengumuman &amp; Warta Terkini
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pengumumanList.map((item) => (
-                <Card key={item.id} className="border-amber-200/80 bg-white dark:bg-slate-900 shadow-sm">
-                  <CardHeader className="p-4 pb-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <CardTitle className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
-                        {item.judul}
-                      </CardTitle>
-                      <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300 shrink-0">
-                        Hingga: {formatDateIndonesian(item.expiry_date)}
-                      </Badge>
+            {/* Asymmetric layout: 1 wide featured bulletin + right stack */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {featuredNotice && (
+                <div className={secondaryNotices.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12'}>
+                  <Card className="h-full border-amber-300/80 bg-white dark:bg-slate-900 shadow-sm p-6 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300">
+                        Penting
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Berlaku hingga: {formatDateIndonesian(featuredNotice.expiry_date)}
+                      </span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-1">
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-3 whitespace-pre-line">
-                      {item.isi_ringkas}
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {featuredNotice.judul}
+                    </h3>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                      {featuredNotice.isi_ringkas}
                     </p>
-                  </CardContent>
-                </Card>
-              ))}
+                  </Card>
+                </div>
+              )}
+
+              {secondaryNotices.length > 0 && (
+                <div className="lg:col-span-5 space-y-4">
+                  {secondaryNotices.map((notice) => (
+                    <Card key={notice.id} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+                          {notice.judul}
+                        </h4>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                          {formatDateIndonesian(notice.expiry_date)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                        {notice.isi_ringkas}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
       )}
 
-      {/* 3. TEMA GEREJA BLOK */}
+      {/* 3. TEMA GEREJA STATEMENT BLOCK (ARCHITECTURAL MONOLITH) */}
       {temaGereja?.tema_tahunan && (
-        <section className="py-12 bg-slate-100 dark:bg-slate-900/50 border-b">
+        <section className="py-14 bg-slate-900 text-white border-b border-slate-800">
           <div className="container max-w-4xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-church-100 text-church-900 text-xs font-semibold uppercase tracking-wider">
-              <Quote className="h-3.5 w-3.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
               Tema Tahunan GPIB
-            </div>
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+            </span>
+            <blockquote className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-50 tracking-tight leading-snug">
               &ldquo;{temaGereja.tema_tahunan}&rdquo;
-            </h3>
+            </blockquote>
             {temaGereja?.tema_jangka_pendek && (
-              <p className="text-sm text-slate-600 dark:text-slate-300 italic max-w-2xl mx-auto">
+              <p className="text-sm text-slate-400 italic max-w-2xl mx-auto pt-1">
                 {temaGereja.tema_jangka_pendek}
               </p>
             )}
@@ -201,78 +289,76 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 4. UPCOMING JADWAL IBADAH & LATEST DOKUMEN SECTION */}
-      <section className="py-16 container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Jadwal Ibadah Terdekat (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="flex items-center justify-between">
+      {/* 4. ASYMMETRIC BENTO: UPCOMING JADWAL & LATEST WARTA */}
+      <section className="py-16 md:py-20 container">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+          {/* Left Block (7 cols): Jadwal Ibadah */}
+          <div className="lg:col-span-7 space-y-5">
+            <div className="flex items-end justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Jadwal Ibadah
+                  Jadwal Ibadah Minggu
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Informasi pelaksanaan ibadah jemaat dan kategorial.
                 </p>
               </div>
-              <Button variant="ghost" size="sm" asChild className="gap-1 text-church-700 hover:text-church-900">
+              <Button variant="ghost" size="sm" asChild className="text-xs font-semibold gap-1">
                 <Link href="/jadwal">
-                  Lihat Semua <ArrowRight className="h-4 w-4" />
+                  Lihat Semua <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>
 
             {upcomingJadwal.length > 0 ? (
-              <div className="space-y-3.5">
+              <div className="space-y-3">
                 {upcomingJadwal.map((jadwal) => (
-                  <Card key={jadwal.id} className="hover:border-church-300 transition-colors">
-                    <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="church">{jadwal.nama_ibadah}</Badge>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-muted-foreground pt-1">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 text-church-600" />
-                            {formatDateTimeIndonesian(jadwal.waktu)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5 text-church-600" />
-                            {jadwal.lokasi}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-slate-700 dark:text-slate-300 font-medium">
-                          <User className="h-3.5 w-3.5 text-muted-foreground" />
-                          Pelayan Firman: {jadwal.pelayan_firman}
-                        </div>
+                  <div
+                    key={jadwal.id}
+                    className="p-5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-card hover:border-slate-400 dark:hover:border-slate-600 transition-colors shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="church">{jadwal.nama_ibadah}</Badge>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300 pt-1">
+                        <span className="flex items-center gap-1 font-mono">
+                          <Clock className="h-3.5 w-3.5 text-slate-500" />
+                          {formatDateTimeIndonesian(jadwal.waktu)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5 text-slate-500" />
+                          {jadwal.lokasi}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium pt-0.5">
+                        Pelayan Firman: {jadwal.pelayan_firman}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
-              <Card className="p-8 text-center bg-slate-50 dark:bg-slate-900">
-                <p className="text-sm text-muted-foreground">
-                  Belum ada jadwal ibadah yang ditambahkan. Silakan periksa kembali nanti.
-                </p>
-              </Card>
+              <div className="p-8 rounded-lg border border-dashed text-center text-xs text-slate-500">
+                Belum ada jadwal ibadah yang ditambahkan.
+              </div>
             )}
           </div>
 
-          {/* Right Column: Warta & Tata Ibadah Terkini (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="flex items-center justify-between">
+          {/* Right Block (5 cols): Warta & Dokumen PDF Unduh Cepat */}
+          <div className="lg:col-span-5 space-y-5">
+            <div className="flex items-end justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                   Warta &amp; Dokumen
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Unduh berkas PDF Warta Jemaat &amp; Tata Ibadah.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Unduh berkas PDF Warta Jemaat dan Tata Ibadah.
                 </p>
               </div>
-              <Button variant="ghost" size="sm" asChild className="gap-1 text-church-700 hover:text-church-900">
+              <Button variant="ghost" size="sm" asChild className="text-xs font-semibold gap-1">
                 <Link href="/warta">
-                  Arsip <ArrowRight className="h-4 w-4" />
+                  Arsip <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
             </div>
@@ -285,72 +371,115 @@ export default async function HomePage() {
                       ? doc.file_pdf.url
                       : null
 
-                  return (
-                    <Card key={doc.id} className="hover:border-church-300 transition-colors">
-                      <CardContent className="p-4 flex items-center justify-between gap-3">
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant={doc.jenis_dokumen === 'warta' ? 'default' : 'secondary'}
-                              className="text-[10px]"
-                            >
-                              {doc.jenis_dokumen === 'warta' ? 'Warta Jemaat' : 'Tata Ibadah'}
-                            </Badge>
-                            <span className="text-[11px] text-muted-foreground">
-                              {formatDateIndonesian(doc.periode_tanggal)}
-                            </span>
-                          </div>
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                            {doc.judul}
-                          </p>
-                        </div>
+                  const isWarta = doc.jenis_dokumen === 'warta'
 
-                        {pdfUrl ? (
-                          <Button size="sm" variant="outline" asChild className="shrink-0 gap-1 text-xs">
-                            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download>
-                              <Download className="h-3.5 w-3.5" />
-                              PDF
-                            </a>
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="outline" disabled className="shrink-0 text-xs">
-                            Tidak Ada File
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
+                  return (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-card hover:border-slate-400 dark:hover:border-slate-600 transition-colors shadow-xs flex items-center justify-between gap-3"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              isWarta
+                                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                                : 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            {isWarta ? 'Warta Jemaat' : 'Tata Ibadah'}
+                          </span>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {formatDateIndonesian(doc.periode_tanggal)}
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {doc.judul}
+                        </p>
+                      </div>
+
+                      {pdfUrl ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="shrink-0 gap-1.5 text-xs font-semibold border-slate-300 dark:border-slate-700 tactile-press"
+                        >
+                          <a href={pdfUrl} target="_blank" rel="noopener noreferrer" download>
+                            <Download className="h-3.5 w-3.5" />
+                            PDF
+                          </a>
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic shrink-0">
+                          Belum ada file
+                        </span>
+                      )}
+                    </div>
                   )
                 })}
               </div>
             ) : (
-              <Card className="p-8 text-center bg-slate-50 dark:bg-slate-900">
-                <p className="text-sm text-muted-foreground">
-                  Belum ada dokumen yang diunggah.
-                </p>
-              </Card>
+              <div className="p-8 rounded-lg border border-dashed text-center text-xs text-slate-500">
+                Belum ada dokumen yang diunggah.
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* 5. PROFIL GEREJA CALLOUT */}
-      <section className="bg-slate-100 dark:bg-slate-900/60 py-16 border-t">
-        <div className="container text-center max-w-3xl space-y-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-church-700 text-white text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" />
-            Tentang GPIB Jemaat Hosiana Jakarta
+      {/* 5. TENTANG GEREJA CALLOUT (ARCHITECTURAL INVITATION TILE) */}
+      <section className="bg-slate-100 dark:bg-slate-900/50 py-16 border-t border-slate-200 dark:border-slate-800">
+        <div className="container max-w-4xl mx-auto">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-card p-8 sm:p-10 shadow-xs space-y-6 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+              <div className="space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Mengenal GPIB Hosiana
+                </span>
+                <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Pelayanan, Visi, dan Pemahaman Iman
+                </h3>
+              </div>
+              <Button asChild className="bg-slate-900 text-slate-50 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 font-semibold tactile-press shrink-0">
+                <Link href="/profil" className="flex items-center gap-2">
+                  Profil Lengkap <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-300">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
+                  <ShieldCheck className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                  Presbiterial Sinodal
+                </div>
+                <p className="leading-relaxed">
+                  Tata gereja terpimpin dalam musyawarah para presbiter (Penatua dan Diaken) bersama jemaat.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
+                  <Compass className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                  6 Pelkat Kategorial
+                </div>
+                <p className="leading-relaxed">
+                  Pelayanan untuk seluruh usia dari Anak (PA), Teruna (PT), Pemuda (GP), Perempuan (PKP), Kaum Bapak (PKB), hingga Lanjut Usia (PKLU).
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm">
+                  <Church className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                  Gereja Terbuka
+                </div>
+                <p className="leading-relaxed">
+                  Terbuka bagi seluruh umat yang rindu bersekutu, mendengarkan firman, dan bertumbuh dalam kasih Kristus.
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Mengenal Lebih Dekat Pelayanan &amp; Visi Gereja
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
-            Pelajari sejarah perjalanan jemaat, pemahaman iman, susunan Pelaksana Harian Majelis Jemaat (PHMJ), serta unit-unit kategorial (Pelkat) yang melayani di tengah jemaat dan masyarakat.
-          </p>
-          <Button asChild size="lg" className="bg-church-800 hover:bg-church-900 text-white font-semibold">
-            <Link href="/profil" className="flex items-center gap-2">
-              Baca Profil Lengkap <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </section>
     </main>

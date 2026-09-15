@@ -2,9 +2,7 @@ import React from 'react'
 import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { Church, Compass, History, BookOpen, Users2, Shield } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Compass, History, BookOpen, Users2, Shield, Church } from 'lucide-react'
 import { RichText } from '@/components/RichText'
 
 export const metadata: Metadata = {
@@ -32,99 +30,125 @@ export default async function ProfilPage() {
       title: 'Visi & Misi',
       icon: Compass,
       content: profilData?.visi_misi,
-      badge: 'Landasan Pelayanan',
+      category: 'Landasan Pelayanan',
     },
     {
       id: 'sejarah',
       title: 'Sejarah Gereja',
       icon: History,
       content: profilData?.sejarah,
-      badge: 'Perjalanan Iman',
+      category: 'Perjalanan Iman',
     },
     {
       id: 'pemahaman-iman',
       title: 'Pemahaman Iman',
       icon: BookOpen,
       content: profilData?.pemahaman_iman,
-      badge: 'Pengakuan Iman GPIB',
+      category: 'Pengakuan Iman GPIB',
     },
     {
       id: 'susunan-phmj',
-      title: 'Susunan Pelaksana Harian Majelis Jemaat (PHMJ)',
+      title: 'Susunan PHMJ',
+      fullTitle: 'Pelaksana Harian Majelis Jemaat (PHMJ)',
       icon: Shield,
       content: profilData?.susunan_phmj,
-      badge: 'Struktur Organisasi',
+      category: 'Struktur Kepemimpinan',
     },
     {
       id: 'susunan-pelkat',
-      title: 'Pelayanan Kategorial (Pelkat) & Unit Missioner',
+      title: 'Pelkat & Unit Missioner',
+      fullTitle: 'Pelayanan Kategorial (Pelkat) & Unit Missioner',
       icon: Users2,
       content: profilData?.susunan_pelkat,
-      badge: 'Unit Pembinaan',
+      category: 'Pembinaan Jemaat',
     },
   ]
 
   return (
-    <main className="py-12 lg:py-16">
-      <div className="container max-w-5xl">
-        {/* Header */}
-        <div className="text-center space-y-3 mb-12">
-          <Badge variant="church" className="px-3.5 py-1 text-xs">
-            Tentang Kami
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Profil GPIB Jemaat Hosiana Jakarta
+    <main className="py-14 md:py-20">
+      <div className="container max-w-6xl space-y-12">
+        {/* Page Header (Architectural Editorial Style) */}
+        <div className="space-y-3 max-w-2xl text-left border-b border-slate-200 dark:border-slate-800 pb-8">
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            Mengenal Lebih Dekat
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Profil GPIB Hosiana Jakarta
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-            Mengenal visi, misi, sejarah perjalanan jemaat, pengakuan iman, serta struktur pelayanan presbiterial sinodal GPIB Jemaat Hosiana Jakarta.
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Visi, misi, sejarah jemaat, pengakuan iman, serta susunan kepengurusan gereja di bawah naungan Gereja Protestan di Indonesia bagian Barat.
           </p>
         </div>
 
-        {/* Navigation Shortcut Chips */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-          {sections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-church-100 hover:text-church-900 dark:hover:bg-slate-700 transition"
-            >
-              {section.title}
-            </a>
-          ))}
-        </div>
+        {/* 2-Column Editorial Magazine Layout (Sticky Sidebar TOC + Main Content) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          {/* Sticky Left Sidebar (3 cols on desktop) */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-card p-5 space-y-4 shadow-xs">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900">
+                  <Church className="h-4 w-4" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  Daftar Bagian
+                </span>
+              </div>
 
-        {/* Content Sections */}
-        <div className="space-y-10">
-          {sections.map((section) => {
-            const Icon = section.icon
+              <nav className="flex flex-col space-y-1">
+                {sections.map((section) => (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    className="flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white transition-colors"
+                  >
+                    <span>{section.title}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      #{section.id}
+                    </span>
+                  </a>
+                ))}
+              </nav>
 
-            return (
-              <Card
-                key={section.id}
-                id={section.id}
-                className="scroll-mt-24 border-slate-200 dark:border-slate-800 shadow-sm"
-              >
-                <CardHeader className="p-6 pb-4 border-b bg-slate-50/70 dark:bg-slate-900/50">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-church-800 text-white">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                        {section.title}
-                      </CardTitle>
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 leading-relaxed">
+                Tata Gereja berasaskan Presbiterial Sinodal berpusat pada Kristus sebagai Kepala Gereja.
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Reading Canvas (8 cols on desktop) */}
+          <div className="lg:col-span-8 space-y-14">
+            {sections.map((section) => {
+              const Icon = section.icon
+              const displayTitle = section.fullTitle || section.title
+
+              return (
+                <article
+                  key={section.id}
+                  id={section.id}
+                  className="scroll-mt-28 space-y-6 pb-12 border-b border-slate-200 dark:border-slate-800 last:border-b-0"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                        {section.category}
+                      </span>
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        {displayTitle}
+                      </h2>
                     </div>
-                    <Badge variant="outline" className="hidden sm:inline-flex text-xs text-church-800 border-church-300">
-                      {section.badge}
-                    </Badge>
+
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                      <Icon className="h-5 w-5" />
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-6 sm:p-8">
-                  <RichText content={section.content} />
-                </CardContent>
-              </Card>
-            )
-          })}
+
+                  <div className="pt-2">
+                    <RichText content={section.content} />
+                  </div>
+                </article>
+              )
+            })}
+          </div>
         </div>
       </div>
     </main>
